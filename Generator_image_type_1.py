@@ -227,12 +227,9 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
         
             text = '\u2300' + spacing + text
             text = text.replace('.',',')
-        
-        
-        
-        
-            
-            
+
+            font_glossar_choice = 'arial.ttf'
+
             fonts=glob.glob(font_glossar_choice)
             
             font=ImageFont.truetype(random.choice(fonts), font_size)
@@ -324,12 +321,8 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
         
             text = '\u2300' + spacing + text
             text = text.replace('.',',')
-        
-        
-        
-        
-            
-            
+
+            font_glossar_choice = 'arial.ttf'
             fonts=glob.glob(font_glossar_choice)
             
             font=ImageFont.truetype(random.choice(fonts), font_size)
@@ -404,12 +397,8 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
         
         text = '\u2300' + spacing + text
         text = text.replace('.',',')
-        
-        
-        
-        
-        
-        
+
+        font_glossar_choice = 'arial.ttf'
         fonts=glob.glob(font_glossar_choice)
         
         font=ImageFont.truetype(random.choice(fonts), font_size)
@@ -567,7 +556,7 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
         
         
         txt_pt = (anfangspunkt[0]+abstand_an_end/2-puffer-2,anfangspunkt[1]-font_size-3-schriftausgleich)
-        
+        font_glossar_choice = 'arial.ttf'
         fonts=glob.glob(font_glossar_choice)
         
         font=ImageFont.truetype(random.choice(fonts), font_size)
@@ -722,7 +711,7 @@ def bemassung_ges(pt1,pt2):
     
         
     txt_pt = (anfangspunkt[0]+abstand_an_end/2-puffer,anfangspunkt[1]-font_size-3-schriftausgleich)
-        
+    font_glossar_choice = 'arial.ttf'
     fonts=glob.glob(font_glossar_choice)
     #Schriftart, Groesse, index
     font=ImageFont.truetype(random.choice(fonts), font_size)
@@ -882,7 +871,7 @@ def tolerance(number=3,pts=[(100,100),(200,100),(300,100)]):
             
             
             txt_pt = (p0[0]+3,p0[1]-schriftausgleich)
-            
+            font_glossar_choice = 'arial.ttf'
             fonts=glob.glob(font_glossar_choice)
             
             
