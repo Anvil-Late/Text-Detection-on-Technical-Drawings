@@ -6,18 +6,20 @@ import numpy as np
 import glob
 import random
 import cv2
+import os
+import json
 import xml.etree.ElementTree as xml
 
 
 
 
 
-dir_path = "INSERT_PATH_OF_ELEMENT_DIR/*.jpg"
+dir_path = r"C:\Users\Alten Canada\Documents\GitHub\Text-Detection-on-Technical-Drawings\src_img\*.png"
 Images = glob.glob(dir_path)
 
 print(len(Images),'elements were found and loaded!')
 
-
+summary_dict = {}
 
 
 
@@ -61,24 +63,22 @@ def image_type_2(num_imgs,annotation=True):
         while i < num_elements:
            
                 
-            element_choice = random.randint(0,len(Images))
+            element_choice = random.randint(0,len(Images)-1)
             element_location = (random.randint(0,img_x),random.randint(0,img_y))
             element = Image.open(Images[element_choice]) 
         
             image.paste(element, element_location)
         
             i+=1
-        
-        
-        
-        
+
+        text_dict = {}
         
         # horizontal dimensions
-        
-        j=0                    
-        
+        text_dict["l"] = {}
+
+        j=0
         while j < 10:
-            
+
             font_size=16
             
             
@@ -89,11 +89,12 @@ def image_type_2(num_imgs,annotation=True):
             else:
                 text=round(random.uniform(1,200), 1)
                 text_int = text.is_integer()
-                
+
                 if text_int == True:
                      
                      text=int(text)
-            
+
+            text_dict["l"][j] = text
             
             
             text=str(text)
@@ -101,6 +102,7 @@ def image_type_2(num_imgs,annotation=True):
             text = text.replace('.',',')
             font_glossar=['seguisym.ttf','osifont.ttf','isocpeui.ttf']
             font_glossar_choice=random.choice(font_glossar)
+            font_glossar_choice = 'arial.ttf'
             txt_pt = (random.randint(20,img_x-70),random.randint(20,img_y-30))
             
             fonts=glob.glob(font_glossar_choice)
@@ -154,17 +156,18 @@ def image_type_2(num_imgs,annotation=True):
         
         
         
-        
+
         
         # horizontal diameter
         
         m=0
-        
+        text_dict["n"] = {}
         while m < 10:
             
             font_size=16
             text=round(random.uniform(1,200), 1)
-            
+            text_dict["n"][m] = text
+
             text_int = text.is_integer()
         
             if text_int == True:
@@ -184,7 +187,7 @@ def image_type_2(num_imgs,annotation=True):
             
             font_glossar=['seguisym.ttf','osifont.ttf','isocpeui.ttf']
             font_glossar_choice=random.choice(font_glossar)
-                                                                                               
+            font_glossar_choice = 'arial.ttf'
             fonts=glob.glob(font_glossar_choice)
             
             font=ImageFont.truetype(random.choice(fonts), font_size)
@@ -237,13 +240,13 @@ def image_type_2(num_imgs,annotation=True):
  
        
         # vertical dimension
-        
+        text_dict["p"] = {}
         o=0
         while o < 10:
             
             font_size=16
             text=round(random.uniform(1,200), 1)
-            
+            text_dict["p"][o] = text
             text_int = text.is_integer()
         
             if text_int == True:
@@ -261,8 +264,9 @@ def image_type_2(num_imgs,annotation=True):
             text = text.replace('.',',')
             
             font_glossar=['seguisym.ttf','osifont.ttf','isocpeui.ttf']
+
             font_glossar_choice=random.choice(font_glossar)
-            
+            font_glossar_choice = 'arial.ttf'
             
             unicode_text=text.encode('utf-8')
             
@@ -324,15 +328,15 @@ def image_type_2(num_imgs,annotation=True):
         
         
         # vertical diameter
-        
+        text_dict["r"] = {}
         q=0
         while q < 10:
             
             font_size=16
             text=round(random.uniform(1,200), 1)
-            
             text_int = text.is_integer()
-        
+            text_dict["r"][q] = text
+
             if text_int == True:
                 
                 text=int(text)
@@ -348,7 +352,7 @@ def image_type_2(num_imgs,annotation=True):
             
             
             unicode_text=text.encode('utf-8')
-            
+            font_glossar_choice = 'arial.ttf'
             fonts=glob.glob(font_glossar_choice)
             
             font=ImageFont.truetype(random.choice(fonts), font_size)
@@ -405,12 +409,12 @@ def image_type_2(num_imgs,annotation=True):
                                             
         
         img=np.array(image)
-        cv2.imwrite('00%s.jpg'%k, img)
+        cv2.imwrite('./gen_img/00%s.jpg'%k, img)
             
             
         
             
-            
+        summary_dict["00%s.jpg"%k] = {}
         if annotation==True:    
             
         
@@ -431,10 +435,13 @@ def image_type_2(num_imgs,annotation=True):
             
             folder.text="Test"
             filename.text=("00%s.jpg"%k)
+            summary_dict["00%s.jpg"%k]["filename"] = "00%s.jpg"%k
             path.text="Unknown"
             database.text="Unknown"
             width.text=str(img_x)
+            summary_dict["00%s.jpg" % k]["width"] = str(img_x)
             height.text=str(img_y)
+            summary_dict["00%s.jpg" % k]["height"] = str(img_y)
                     
             #depth grayscale=0, color=3
             depth.text="3"
@@ -444,6 +451,7 @@ def image_type_2(num_imgs,annotation=True):
             l=0
                     
             while l < len(masse_hor):
+                item_descr = {}
                 xml_object=xml.SubElement(xml_doc,"object")
                 name=xml.SubElement(xml_object,"name")
                 pose=xml.SubElement(xml_object,"pose")
@@ -462,13 +470,21 @@ def image_type_2(num_imgs,annotation=True):
                 ymin.text=str(int(masse_hor[l][1]-2))
                 xmax.text=str(int(masse_hor[l][2]))
                 ymax.text=str(int(masse_hor[l][3]+2))
-            
+                item_descr["text"] = text_dict["l"][l]
+                item_descr["xmin"] = int(masse_hor[l][0])
+                item_descr["ymin"] = int(masse_hor[l][1]-2)
+                item_descr["xmax"] = int(masse_hor[l][2])
+                item_descr["ymax"] = int(masse_hor[l][3]+2)
+
+                summary_dict["00%s.jpg" % k][f"item_l_{l}"] = item_descr
                 l+=1
-            
+
+
             
             n=0
                     
             while n < len(durch_hor):
+                item_descr = {}
                 xml_object=xml.SubElement(xml_doc,"object")
                 name=xml.SubElement(xml_object,"name")
                 pose=xml.SubElement(xml_object,"pose")
@@ -487,12 +503,20 @@ def image_type_2(num_imgs,annotation=True):
                 ymin.text=str(int(durch_hor[n][1]-2))
                 xmax.text=str(int(durch_hor[n][2]))
                 ymax.text=str(int(durch_hor[n][3]+2))
+                item_descr["text"] = text_dict["n"][n]
+                item_descr["xmin"] = int(durch_hor[n][0])
+                item_descr["ymin"] = int(durch_hor[n][1] - 2)
+                item_descr["xmax"] = int(durch_hor[n][2])
+                item_descr["ymax"] = int(durch_hor[n][3] + 2)
+
+                summary_dict["00%s.jpg" % k][f"item_n_{n}"] = item_descr
             
                 n+=1
                     
             p=0
                     
             while p < len(masse_ver):
+                item_descr = {}
                 xml_object=xml.SubElement(xml_doc,"object")
                 name=xml.SubElement(xml_object,"name")
                 pose=xml.SubElement(xml_object,"pose")
@@ -511,12 +535,20 @@ def image_type_2(num_imgs,annotation=True):
                 ymin.text=str(int(masse_ver[p][1]-2))
                 xmax.text=str(int(masse_ver[p][2]))
                 ymax.text=str(int(masse_ver[p][3]+2))
+                item_descr["text"] = text_dict["p"][p]
+                item_descr["xmin"] = int(masse_ver[p][0])
+                item_descr["ymin"] = int(masse_ver[p][1] - 2)
+                item_descr["xmax"] = int(masse_ver[p][2])
+                item_descr["ymax"] = int(masse_ver[p][3] + 2)
+
+                summary_dict["00%s.jpg" % k][f"item_p_{p}"] = item_descr
             
                 p+=1
             
             r=0
                     
             while r < len(durch_ver):
+                item_descr = {}
                 xml_object=xml.SubElement(xml_doc,"object")
                 name=xml.SubElement(xml_object,"name")
                 pose=xml.SubElement(xml_object,"pose")
@@ -535,6 +567,13 @@ def image_type_2(num_imgs,annotation=True):
                 ymin.text=str(int(durch_ver[r][1]-2))
                 xmax.text=str(int(durch_ver[r][2]))
                 ymax.text=str(int(durch_ver[r][3]+2))
+                item_descr["text"] = text_dict["r"][r]
+                item_descr["xmin"] = int(durch_ver[r][0])
+                item_descr["ymin"] = int(durch_ver[r][1] - 2)
+                item_descr["xmax"] = int(durch_ver[r][2])
+                item_descr["ymax"] = int(durch_ver[r][3] + 2)
+
+                summary_dict["00%s.jpg" % k][f"item_r_{r}"] = item_descr
             
                 r+=1        
             
@@ -561,17 +600,20 @@ def image_type_2(num_imgs,annotation=True):
                           
                         
             tree = xml.ElementTree(xml_doc)
-            tree.write('00%s.xml'%k)
-        
+            tree.write('./gen_img/00%s.xml'%k)
+
+            with open('./gen_img/00%s.json'%k, 'w') as f:
+                json.dump(summary_dict, f)
         
         
         
         k+=1
+
+
+#with open(r"C:\Users\Alten Canada\Documents\GitHub\Text-Detection-on-Technical-Drawings\gen_img\000.json", 'r') as f:
+#    summary_dict = json.load(f)
     
-    
-    
-    
-    
+
 image_type_2(5)    
     
     
