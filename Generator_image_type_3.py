@@ -28,7 +28,8 @@ def image_type_3(num_imgs):
         
         # selection of fonts
         font_glossar=['seguisym.ttf','osifont.ttf','isocpeui.ttf', 'verdana.ttf', 'ARIALNB.ttf','cambria.ttc','unifont-14.0.02.ttf']
-        font_glossar_choice=random.choice(font_glossar)
+        #font_glossar_choice=random.choice(font_glossar)
+        font_glossar_choice = 'arial.ttf'
                     
         
         if font_glossar_choice=='seguisym.ttf':
@@ -69,6 +70,7 @@ def image_type_3(num_imgs):
         
         
         fonts=glob.glob(font_glossar_choice)
+        print(fonts)
         
         font=ImageFont.truetype(random.choice(fonts), font_size)
         
@@ -97,9 +99,8 @@ def image_type_3(num_imgs):
         
         k+=1
 
-
-
 image_type_3(2)
+
 
 
 
