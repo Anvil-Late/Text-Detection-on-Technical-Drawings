@@ -7,9 +7,10 @@ import random
 import cv2
 import xml.etree.ElementTree as xml
 from sys import exit
+import json
 
 
-
+text_dict = {}
 
 def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
     """Generates a geometrie with dimensioning on a blank image
@@ -140,7 +141,7 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
             dicke (int): line thickness
             
         """
-    
+
         font_glossar=['seguisym.ttf','osifont.ttf','isocpeui.ttf']
         font_glossar_choice=random.choice(font_glossar)
     
@@ -272,6 +273,7 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
         
             b_box = (min_x, min_y, max_x, max_y)
             masse_ver.append(b_box)
+            text_ver.append(text)
             
          
             
@@ -364,8 +366,8 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
 
         
             b_box = (min_x, min_y, max_x, max_y)
-            masse_ver.append(b_box)   
-            
+            masse_ver.append(b_box)
+            text_ver.append(text)
         
         
         
@@ -441,7 +443,8 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
         
         b_box = (min_x, min_y, max_x, max_y)
         masse_ver.append(b_box)
-        
+        text_ver.append(text)
+
         
         
         
@@ -585,7 +588,7 @@ def geometrie_generator(punkt,anzahl_poly=4,dicke=2,farbe='black'):
 
         b_box = (min_x, min_y, max_x, max_y)
         masse_hor.append(b_box)
-        
+        text_hor.append(text)
         
         
     
@@ -736,7 +739,7 @@ def bemassung_ges(pt1,pt2):
 
     b_box = (min_x, min_y, max_x, max_y)
     masse_hor.append(b_box)
-    
+    text_hor.append(text)
     
     
 
@@ -865,10 +868,9 @@ def tolerance(number=3,pts=[(100,100),(200,100),(300,100)]):
                 schriftausgleich=0
             else:
                 text = random.choice(special_char_osiu)
-                schriftausgleich=4
-            
-            
-            
+                schriftausgleich=-1
+
+            #schriftausgleich=-1
             
             txt_pt = (p0[0]+3,p0[1]-schriftausgleich)
             font_glossar_choice = 'arial.ttf'
@@ -899,6 +901,7 @@ def tolerance(number=3,pts=[(100,100),(200,100),(300,100)]):
 
             b_box = (min_x, min_y, max_x, max_y)
             toler.append(b_box)
+            text_toler.append(text)
             
             
             
@@ -914,7 +917,7 @@ def augmentation(image):
         
         Returns:
             image : augmented image
-    """     
+    """
         
     image= ImageEnhance.Sharpness(image)
     image= image.enhance(random.uniform(0.0,1.0))
@@ -943,6 +946,7 @@ annotation=True
 
 
 k=0
+summary_dict = {}
 
 while (k<num_imgs):
     
@@ -951,7 +955,10 @@ while (k<num_imgs):
     
     masse_hor=[]
     masse_ver=[]
+    text_ver = []
+    text_hor = []
     toler=[]
+    text_toler = []
     poly_pts=[]
     
     image=Image.new('RGBA', (img_x, int(img_y)), (255,255,255))
@@ -983,11 +990,11 @@ while (k<num_imgs):
     
             
     img=np.array(image)
-    cv2.imwrite('00%s.jpg'%k, img) #if you want to save the image
+    cv2.imwrite('./gen_img_type_1/00%s.jpg'%k, img) #if you want to save the image
         
         
     #Annotation   
-    
+    summary_dict["00%s.jpg" % k] = {}
     if annotation==True:
     
         xml_doc = xml.Element("annotation")
@@ -1015,11 +1022,16 @@ while (k<num_imgs):
         #depth grayscale=0, color=3
         depth.text="3"
         segment.text="0"
+
+        summary_dict["00%s.jpg" % k]["filename"] = "00%s.jpg" % k
+        summary_dict["00%s.jpg" % k]["width"] = str(img_x)
+        summary_dict["00%s.jpg" % k]["height"] = str(img_y)
                 
         
         l=0
                 
         while l < len(masse_ver):
+            item_descr = {}
             xml_object=xml.SubElement(xml_doc,"object")
             name=xml.SubElement(xml_object,"name")
             pose=xml.SubElement(xml_object,"pose")
@@ -1038,6 +1050,13 @@ while (k<num_imgs):
             ymin.text=str(int(masse_ver[l][1]-7))
             xmax.text=str(int(masse_ver[l][2]))
             ymax.text=str(int(masse_ver[l][3]+7))
+            item_descr["text"] = text_ver[l]
+            item_descr["xmin"] = int(masse_ver[l][0])
+            item_descr["ymin"] = int(masse_ver[l][1]-7)
+            item_descr["xmax"] = int(masse_ver[l][2])
+            item_descr["ymax"] = int(masse_ver[l][3]+7)
+
+            summary_dict["00%s.jpg" % k][f"ver_item_{l}"] = item_descr
         
             l+=1
         
@@ -1045,6 +1064,7 @@ while (k<num_imgs):
         j=0
                 
         while j < len(masse_hor):
+            item_descr = {}
             xml_object=xml.SubElement(xml_doc,"object")
             name=xml.SubElement(xml_object,"name")
             pose=xml.SubElement(xml_object,"pose")
@@ -1063,12 +1083,20 @@ while (k<num_imgs):
             ymin.text=str(int(masse_hor[j][1]))
             xmax.text=str(int(masse_hor[j][2]+7))
             ymax.text=str(int(masse_hor[j][3]))
+            item_descr["text"] = text_hor[j]
+            item_descr["xmin"] = int(masse_hor[j][0]-7)
+            item_descr["ymin"] = int(masse_hor[j][1])
+            item_descr["xmax"] = int(masse_hor[j][2]+7)
+            item_descr["ymax"] = int(masse_hor[j][3])
+
+            summary_dict["00%s.jpg" % k][f"hor_item_{j}"] = item_descr
         
             j+=1
         
         m=0
                 
         while m < len(toler):
+            item_descr = {}
             xml_object=xml.SubElement(xml_doc,"object")
             name=xml.SubElement(xml_object,"name")
             pose=xml.SubElement(xml_object,"pose")
@@ -1087,6 +1115,13 @@ while (k<num_imgs):
             ymin.text=str(int(toler[m][1]))
             xmax.text=str(int(toler[m][2]))
             ymax.text=str(int(toler[m][3]))
+            item_descr["text"] = text_toler[m]
+            item_descr["xmin"] = int(toler[m][0])
+            item_descr["ymin"] = int(toler[m][1])
+            item_descr["xmax"] = int(toler[m][2])
+            item_descr["ymax"] = int(toler[m][3])
+
+            summary_dict["00%s.jpg" % k][f"tol_item_{m}"] = item_descr
         
             m+=1
         
@@ -1111,7 +1146,10 @@ while (k<num_imgs):
         
         
         tree = xml.ElementTree(xml_doc)
-        tree.write('00%s.xml'%k)
+        tree.write('./gen_img_type_1/00%s.xml'%k)
+
+        with open('./gen_img_type_1/00%s.json' % k, 'w') as f:
+            json.dump(summary_dict, f)
 
     k+=1
 
