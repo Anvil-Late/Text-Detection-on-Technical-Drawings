@@ -14,7 +14,7 @@ import xml.etree.ElementTree as xml
 
 
 
-dir_path = r"C:\Users\Alten Canada\Documents\GitHub\Text-Detection-on-Technical-Drawings\src_img\*.png"
+dir_path = r"C:\Users\Alten Canada\Documents\GitHub\Text-Detection-on-Technical-Drawings\src_img\*.jpg"
 Images = glob.glob(dir_path)
 
 print(len(Images),'elements were found and loaded!')
